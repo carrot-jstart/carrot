@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    carrot:
+      config:
+        access-token: 123456
+        server-addr: 127.0.0.1:9848
+      discovery:
+        group: DEFAULT_GROUP
+        server-addr: 127.0.0.1:9848
+        ip: 127.0.0.1
+        port: ${server.port}
+        namespace: public
+        access-token: 123456
+server:
+  port: 8080

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: dubbo-demo-consumer
+
+server:
+  port: 8082
+
+dubbo:
+  application:
+    name: ${spring.application.name}
+    qos-enable: false
+    register-mode: interface
+  consumer:
+    check: false
+  registry:
+    address: carrot://192.168.0.23:9848?accessToken=123456&namespace=public&group=dubbo
+    check: false

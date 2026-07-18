@@ -1,0 +1,23 @@
+// scheduling_executor.proto
+syntax = "proto3";
+
+package org.jstart.carrot.scheduling;
+
+import "google/protobuf/empty.proto";
+
+// 定义执行器RPC服务
+service SchedulingExecutorService {
+  //定义执行方法
+  rpc runTask (RunTaskRequest) returns (google.protobuf.Empty) {}
+}
+
+
+// 请求消息格式
+message RunTaskRequest {
+  // 任务名称
+  string unitName = 1;
+  //请求头
+  string secret = 2;
+  //任务id
+  string taskId = 3;
+}

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package org.jstart.carrot.discovery.grpc;
+
+import "google/protobuf/empty.proto";
+
+service DiscoveryService {
+  // 获取服务列表
+  rpc GetServerList(google.protobuf.Empty) returns (ServerListResponse) {}
+  // 注册服务
+  rpc Register(RegisterRequest) returns (Reply) {}
+  // 心跳
+  rpc HeartbeatStream(stream HeartbeatRequest) returns (stream Reply) {}
+  // 注销服务
+  rpc Deregister(DeregisterRequest) returns (Reply) {}
+  // 获取服务实例列表
+  rpc ListInstances(ListInstancesRequest) returns (ListInstancesResponse) {}
+  // 订阅服务
+  rpc Subscribe(SubscribeRequest) returns (stream ServiceEvent) {}
+}
+
+message ServerNode {
+  string host = 1;
+  int32 port = 2;
+}
+
+message ServerListResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated ServerNode nodes = 3;
+}
+
+message ServiceKey {
+  string namespace = 1;
+  string group = 2;
+  string serviceName = 3;
+}
+
+message Instance {
+  string instanceId = 1;
+  string ip = 2;
+  int32 port = 3;
+  double weight = 4;
+  int64 lastHeartbeatAt = 5;
+  map<string, string> metadata = 6;
+}
+
+message RegisterRequest {
+  string accessToken = 1;
+  ServiceKey service = 2;
+  Instance instance = 3;
+}
+
+message HeartbeatRequest {
+  string accessToken = 1;
+  ServiceKey service = 2;
+  string instanceId = 3;
+  string ip = 4;
+  int32 port = 5;
+}
+
+message DeregisterRequest {
+  string accessToken = 1;
+  ServiceKey service = 2;
+  string instanceId = 3;
+  string ip = 4;
+  int32 port = 5;
+}
+
+message ListInstancesRequest {
+  string accessToken = 1;
+  ServiceKey service = 2;
+}
+
+message ListInstancesResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 version = 3;
+  repeated Instance instances = 4;
+}
+
+message SubscribeRequest {
+  string accessToken = 1;
+  ServiceKey service = 2;
+  int64 sinceVersion = 3;
+  bool onlyHealthy = 4;
+}
+
+message ServiceEvent {
+  int32 code = 1;
+  string message = 2;
+  ServiceKey service = 3;
+  int64 version = 4;
+  repeated Instance instances = 5;
+}
+
+message Reply {
+  int32 code = 1;
+  string message = 2;
+  string data = 3;
+}

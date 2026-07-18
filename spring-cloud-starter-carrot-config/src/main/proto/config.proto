@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package org.jstart.carrot.config.grpc;
+
+import "google/protobuf/empty.proto";
+
+service ConfigService {
+  rpc GetServerList(google.protobuf.Empty) returns (ServerListResponse) {}
+  rpc GetConfig(GetConfigRequest) returns (ConfigResponse) {}
+  rpc PublishConfig(PublishConfigRequest) returns (Reply) {}
+  rpc Watch(stream WatchRequest) returns (stream WatchResponse) {}
+}
+
+message ServerNode {
+  string host = 1;
+  int32 port = 2;
+}
+
+message ServerListResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated ServerNode nodes = 3;
+}
+
+message ConfigKey {
+  string namespace = 1;
+  string group = 2;
+  string dataId = 3;
+}
+
+message ConfigMeta {
+  ConfigKey key = 1;
+  int64 lastModified = 2;
+}
+
+message GetConfigRequest {
+  string accessToken = 1;
+  ConfigKey key = 2;
+}
+
+message ConfigResponse {
+  int32 code = 1;
+  string message = 2;
+  ConfigKey key = 3;
+  int64 lastModified = 4;
+  string content = 5;
+  string md5 = 6;
+  string contentType = 7;
+}
+
+message PublishConfigRequest {
+  string accessToken = 1;
+  ConfigKey key = 2;
+  string content = 3;
+  string md5 = 4;
+  string contentType = 5;
+}
+
+message WatchRequest {
+  string accessToken = 1;
+  repeated ConfigMeta configs = 2;
+}
+
+message WatchResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated ConfigMeta changed = 3;
+}
+
+message Reply {
+  int32 code = 1;
+  string message = 2;
+  string data = 3;
+}

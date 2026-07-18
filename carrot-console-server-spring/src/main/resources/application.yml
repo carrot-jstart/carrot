@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: carrot-admin
+    version: 1.0.0
+
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://192.168.0.23:25432/carrot?currentSchema=public}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
+  grpc:
+    server:
+      port: ${SPRING_GRPC_SERVER_PORT:9848}
+  cloud:
+    carrot:
+      scheduling:
+        admin:
+          access-token: ${carrot.admin.access-token}
+          server-addr: ${carrot.admin.ip}:${spring.grpc.server.port}
+        executor:
+          name: ${SPRING_CLOUD_CARROT_SCHEDULING_EXECUTOR_NAME:carrot-admin}
+          port: ${SPRING_CLOUD_CARROT_SCHEDULING_EXECUTOR_PORT:9966}
+          namespace: ${carrot.admin.Admin-namespace}
+          group: ${SPRING_CLOUD_CARROT_SCHEDULING_EXECUTOR_GROUP:admin}
+carrot:
+  i18n:
+    default-language: ${CARROT_I18N_DEFAULT_LANGUAGE:zh-CN}
+  admin:
+    access-token: ${CARROT_ADMIN_ACCESS_TOKEN:123456}
+    Admin-namespace: ${CARROT_ADMIN_NAMESPACE:carrot@admin}
+    ip: ${CARROT_ADMIN_IP:192.168.0.19}
+server:
+  port: ${SERVER_PORT:8848}

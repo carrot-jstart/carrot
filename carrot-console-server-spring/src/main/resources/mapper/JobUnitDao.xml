@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.jstart.carrot.console.infrastructure.repository.SchedulingJobUnitDao">
+
+
+    <select id="getUnitExecutorNameByNamespace" resultType="string">
+        SELECT
+            executor_name
+        FROM scheduling_job_unit
+        WHERE  namespace_id = #{namespaceId}
+        GROUP BY executor_name
+    </select>
+
+    <select id="getUnitGroupByNamespace" resultType="string">
+        SELECT
+               group_name
+        FROM scheduling_job_unit
+        WHERE  namespace_id = #{namespaceId}
+        GROUP BY group_name
+    </select>
+
+
+    <select id="schedule" resultType="org.jstart.carrot.console.domain.scheduling.model.JobUnitModel">
+        SELECT *
+        FROM scheduling_job_unit
+        WHERE
+            enable = 0
+          AND hash_value % ${mod} = ${modValue}
+    </select>
+</mapper>

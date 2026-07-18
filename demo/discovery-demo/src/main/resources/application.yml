@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: discovery-demo
+  cloud:
+    carrot:
+      discovery:
+        server-addr: 127.0.0.1:9848
+        access-token: 123456
+        namespace: public
+        group: DEFAULT_GROUP
+        service: ${spring.application.name}
+        ip: 127.0.0.1
+        port: ${server.port}
+
+server:
+  port: 8085

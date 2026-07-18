@@ -1,0 +1,22 @@
+                    ____     ____
+                  /'    |   |    \
+                /    /  |   | \   \
+              /    / |  |   |  \   \              Carrot-Scheduling Server API ${spring.application.version}
+             (   /   |  """"   |\   \             Running in ${spring.cloud.carrot.scheduling.admin.register-type} mode
+             | /   / /^\    /^\  \  _|            Port: ${server.port}(web admin),${spring.grpc.server.port}(grpc admin),${spring.cloud.carrot.scheduling.executor.port}(host scheduling)
+              ~   | |   |  |   | | ~              Pid: ${pid}
+                  | |__O|__|O__| |
+                /~~      \/     ~~\               https://carrot.io
+               /   (      |      )  \
+         _--_  /,   \____/^\___/'   \  _--_
+       /~    ~\ / -____-|_|_|-____-\ /~    ~\
+     /________|___/~~~~\___/~~~~\ __|________\
+--~~~          ^ |     |   |     |  -     :  ~~~~~:~-_     ___-----~~~~~~~~|
+   /             `^-^-^'   `^-^-^'                  :  ~\ /'   ____/--------|
+       --                                            ;   |/~~~------~~~~~~~~~|
+ ;                                    :              :    |----------/--------|
+:                     ,                           ;    .  |---\\--------------|
+ :     -                          .                  : : |______________-__|
+  :              ,                 ,                :   /'~----___________|
+__  \\\        ^                          ,, ;; ;; ;._-~
+  ~~~-----____________________________________----~~~

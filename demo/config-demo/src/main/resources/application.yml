@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: config-demo
+  cloud:
+    carrot:
+      config:
+        server-addr: ${CARROT_CONFIG_SERVER_ADDR:127.0.0.1:9848}
+        access-token: ${CARROT_CONFIG_ACCESS_TOKEN:123456}
+        files:
+          - namespace: public
+            group: DEFAULT_GROUP
+            data-id: test-demo.yml
+        watch-interval-millis: 2000
+        refresh-enabled: true

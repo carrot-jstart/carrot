@@ -1,0 +1,96 @@
+// scheduling_admin.proto
+syntax = "proto3";
+
+package org.jstart.carrot.scheduling;
+
+import "google/protobuf/empty.proto";
+
+// 定义执行器RPC服务
+service SchedulingAdminService {
+  // 定义心跳上传方法
+  rpc heartbeat (stream HeartbeatRequest) returns (stream Reply) {}
+  //获取admin节点列表
+  rpc getAdminNodes (google.protobuf.Empty) returns (AdminNodeList) {}
+  //注册自己的执行单元
+  rpc registerUnitList (RegisterUnitListRequest) returns (Reply) {}
+  // 注销执行器
+  rpc unregister (UnregisterRequest) returns (Reply) {}
+  //任务回执
+  rpc taskReceipt (TaskReceiptRequest) returns (google.protobuf.Empty) {}
+}
+message ServiceKey {
+  string namespace = 1;
+  string group = 2;
+  string serviceName = 3;
+}
+
+message UnregisterRequest{
+  string accessToken = 1;
+  ServiceKey serviceKey = 2;
+  string ip = 3;
+  int32 port = 4;
+}
+
+
+message AdminNodeList{
+  repeated AdminNode adminNode = 1;
+}
+
+message AdminNode{
+  string ip = 1;
+  int32 port = 2;
+  double weight = 3;
+}
+
+
+// 请求消息格式
+message HeartbeatRequest {
+  string accessToken = 1;
+  ServiceKey serviceKey = 2;
+  string ip = 3;
+  int32 port = 4;
+  string secret = 5;
+  double weight = 6;
+}
+message RegisterUnitListRequest{
+  string accessToken = 1;
+  ServiceKey serviceKey = 2;
+  repeated Unit unitList = 3;
+
+}
+
+
+// 任务消息格式
+message Unit {
+  // 任务名称
+  string name = 1;
+
+  int32 type = 2;
+
+  string typeValue = 3;
+}
+
+// 响应消息格式
+message Reply {
+  // 响应码
+  int32 code = 1;
+  // 响应信息
+  string message = 2;
+  // 响应数据
+  string data = 3;
+}
+
+message TaskReceiptRequest{
+  //accessToken
+  string accessToken = 1;
+  //任务id
+  string taskId = 2;
+  // 响应码
+  int32 code = 3;
+  // 响应信息
+  string message = 4;
+  // 响应数据
+  string data = 5;
+  //日志记录
+  repeated string records = 6;
+}

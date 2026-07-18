@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.jstart.carrot.console.infrastructure.repository.SchedulingJobRecordDao">
+    <resultMap id="jobRecordModel" type="org.jstart.carrot.console.domain.scheduling.model.JobRecordModel">
+        <id property="id" column="id"/>
+        <result property="unitId" column="unit_id"/>
+        <result property="namespaceId" column="namespace_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="ip" column="ip"/>
+        <result property="port" column="port"/>
+        <result property="secret" column="secret"/>
+        <result property="unitName" column="unit_name"/>
+        <result property="planStartTime" column="plan_start_time"/>
+        <result property="actualStartTime" column="actual_start_time"/>
+        <result property="actualEndTime" column="actual_end_time"/>
+        <result property="code" column="code"/>
+        <result property="message" column="message"/>
+        <result property="result" column="result"/>
+        <result property="log" column="log" typeHandler="org.jstart.carrot.console.infrastructure.pg.StringListArrayTypeHandler"/>
+        <result property="hashValue" column="hash_value"/>
+    </resultMap>
+
+    <select id="getRecentPlan" resultMap="jobRecordModel">
+        SELECT *
+        FROM scheduling_job_record
+        WHERE  plan_start_time >= #{startTime}
+          AND plan_start_time &lt; #{endTime}
+          AND hash_value % ${mod} = ${modValue}
+        ORDER BY plan_start_time ASC
+    </select>
+
+
+    <delete id="removeExpiredData">
+        DELETE FROM scheduling_job_record
+        WHERE (unit_id, id) IN (
+            SELECT unit_id, id
+            FROM (
+                     SELECT id, unit_id,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY unit_id
+                                ORDER BY plan_start_time DESC, id
+                                ) AS rn
+                     FROM scheduling_job_record
+                     WHERE code = #{successCode}
+                 ) t
+            WHERE rn > #{saveSuccessLimit}
+        );
+    </delete>
+</mapper>
