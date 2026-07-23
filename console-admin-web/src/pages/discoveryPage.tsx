@@ -151,12 +151,23 @@ export default function DiscoveryPage() {
             },
         },
         {
-            title: t("discovery.instanceMetadata"), dataIndex: "metadata", key: "metadata",
+            title: t("discovery.instanceMetadata"), dataIndex: "metadata", key: "metadata", width: 300,
             render: (v: unknown) => {
                 if (!v) return "-";
-                if (Array.isArray(v)) return v.map((item: KeyValue<string, string>) => `${item.key}=${item.value}`).join(", ") || "-";
-                if (typeof v === "object") return Object.entries(v as Record<string, unknown>).map(([k, val]) => `${k}=${String(val)}`).join(", ") || "-";
-                return String(v);
+                let items: string[];
+                if (Array.isArray(v)) {
+                    items = v.map((item: KeyValue<string, string>) => `${item.key}=${item.value}`);
+                } else if (typeof v === "object") {
+                    items = Object.entries(v as Record<string, unknown>).map(([k, val]) => `${k}=${String(val)}`);
+                } else {
+                    return String(v);
+                }
+                if (items.length === 0) return "-";
+                return (
+                    <div style={{ whiteSpace: "nowrap", overflowX: "auto", maxWidth: 300 }}>
+                        {items.map((item, i) => <div key={i}>{item}</div>)}
+                    </div>
+                );
             },
         },
     ];
