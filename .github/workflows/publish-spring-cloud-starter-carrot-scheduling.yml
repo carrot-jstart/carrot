@@ -51,18 +51,6 @@ jobs:
           Write-Host "Imported GPG secret keys:"
           gpg --list-secret-keys --keyid-format LONG
 
-      - name: Cache GPG passphrase in gpg-agent
-        shell: bash
-        run: |
-          GPG_KEYGRIP=$(gpg --with-keygrip --list-secret-keys --keyid-format LONG 2>/dev/null | grep 'Keygrip' | head -1 | awk '{print $3}')
-          if [ -n "$GPG_KEYGRIP" ]; then
-            echo "Caching passphrase for keygrip: $GPG_KEYGRIP"
-            echo "$MAVEN_GPG_PASSPHRASE" | /usr/lib/gnupg2/gpg-preset-passphrase --preset "$GPG_KEYGRIP"
-          else
-            echo "No keygrip found, trying alternative method..."
-            echo "$MAVEN_GPG_PASSPHRASE" | gpg --batch --passphrase-fd 0 --quick-sign-key $(gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep '^sec' | head -1 | sed 's/.*\/\([A-F0-9]\+\).*/\1/') 2>/dev/null || true
-          fi
-
       - name: Validate release version
         shell: pwsh
         run: |
@@ -90,4 +78,4 @@ jobs:
           Write-Host "Version validated: $expectedVersion"
 
       - name: Publish to Maven Central
-        run: mvn -B -ntp -Pcentral-release -DskipTests deploy -f spring-cloud-starter-carrot-scheduling/pom.xml
+        run: mvn -B -ntp -Pcentral-release -DskipTests -Dgpg.passphrase="$MAVEN_GPG_PASSPHRASE" deploy -f spring-cloud-starter-carrot-scheduling/pom.xml
