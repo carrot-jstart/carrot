@@ -84,7 +84,7 @@ public class CarrotDubboRegistry extends FailbackRegistry {
             }
             return toProviderUrls(url, response.getInstancesList());
         } catch (Exception e) {
-            logger.warn("carrot dubbo lookup failed: {}", e.getMessage());
+            logger.warn("carrot dubbo lookup failed: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -189,7 +189,7 @@ public class CarrotDubboRegistry extends FailbackRegistry {
             try {
                 return new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
             } catch (Exception e) {
-                logger.warn("carrot dubbo decode namespace failed: {}", e.getMessage());
+                logger.warn("carrot dubbo decode namespace failed: {}", e.getMessage(), e);
             }
         }
         return DEFAULT_NAMESPACE;
@@ -232,7 +232,7 @@ public class CarrotDubboRegistry extends FailbackRegistry {
                 }
                 urls.put(providerUrl.toFullString(), providerUrl);
             } catch (Exception e) {
-                logger.warn("carrot dubbo parse provider url failed, rawUrl={}, message={}", rawUrl, e.getMessage());
+                logger.warn("carrot dubbo parse provider url failed, rawUrl={}, message={}", rawUrl, e.getMessage(), e);
             }
         }
         if (urls.isEmpty()) {
@@ -343,7 +343,7 @@ public class CarrotDubboRegistry extends FailbackRegistry {
                     registerAndOpenHeartbeat(currentNode);
                     observer = heartbeatObserver;
                 } catch (Exception e) {
-                    logger.warn("carrot dubbo reconnect heartbeat failed: {}", e.getMessage());
+                    logger.warn("carrot dubbo reconnect heartbeat failed: {}", e.getMessage(), e);
                     return;
                 }
             }
@@ -367,10 +367,52 @@ public class CarrotDubboRegistry extends FailbackRegistry {
             if (heartbeatObserver != null) {
                 return;
             }
+
+            // 初始注册时先尝试当前共享 channel，避免切换节点干扰其他 RegistrationState
+            if (excluded == null) {
+                try {
+                    Discovery.Reply reply = discoveryClient.register(serviceKey, instance);
+                    if (reply.getCode() == EResultCode.SUCCESS.getCode()) {
+                        currentNode = discoveryClient.getCurrentNode();
+                        heartbeatObserver = discoveryClient.openHeartbeatStream(new StreamObserver<>() {
+                            @Override
+                            public void onNext(Discovery.Reply value) {
+                                if (value == null) {
+                                    return;
+                                }
+                                if (value.getCode() == EResultCode.SUCCESS.getCode()) {
+                                    return;
+                                }
+                                logger.warn("carrot dubbo heartbeat rejected: code={}, message={}",
+                                        value.getCode(), value.getMessage());
+                                markDisconnected();
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
+                                logger.warn("carrot dubbo heartbeat stream error: {}", t.getMessage());
+                                markDisconnected();
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                logger.warn("carrot dubbo heartbeat stream completed");
+                                markDisconnected();
+                            }
+                        });
+                        return;
+                    }
+                } catch (Exception e) {
+                    logger.debug("carrot dubbo register failed on current node, will retry on another: {}",
+                            e.getMessage());
+                }
+            }
+
+            // 当前 channel 不可用（或重连时），切换到其他节点再试
             try {
                 discoveryClient.refreshServerNodes();
             } catch (Exception e) {
-                logger.debug("carrot dubbo refresh server nodes failed: {}", e.getMessage());
+                logger.debug("carrot dubbo refresh server nodes failed: {}", e.getMessage(), e);
             }
             currentNode = excluded == null
                     ? discoveryClient.switchToRandomServerNode()
@@ -413,11 +455,10 @@ public class CarrotDubboRegistry extends FailbackRegistry {
                 try {
                     heartbeatObserver.onCompleted();
                 } catch (Exception e) {
-                    logger.debug("carrot dubbo close heartbeat stream failed: {}", e.getMessage());
+                    logger.debug("carrot dubbo close heartbeat stream failed: {}", e.getMessage(), e);
                 }
             }
             heartbeatObserver = null;
-            discoveryClient.closeChannel();
         }
 
         private void stop(boolean deregister) {
@@ -431,7 +472,7 @@ public class CarrotDubboRegistry extends FailbackRegistry {
                 try {
                     discoveryClient.deregister(serviceKey, instanceId, ip, port);
                 } catch (Exception e) {
-                    logger.warn("carrot dubbo deregister failed: {}", e.getMessage());
+                    logger.warn("carrot dubbo deregister failed: {}", e.getMessage(), e);
                 }
             }
         }
@@ -458,6 +499,7 @@ public class CarrotDubboRegistry extends FailbackRegistry {
             long interval = Math.max(pollIntervalMs, 1000L);
             pollFuture = scheduler.scheduleAtFixedRate(this::safePoll, interval, interval, TimeUnit.MILLISECONDS);
         }
+
         private void safePoll() {
             try {
                 pollAndNotify();

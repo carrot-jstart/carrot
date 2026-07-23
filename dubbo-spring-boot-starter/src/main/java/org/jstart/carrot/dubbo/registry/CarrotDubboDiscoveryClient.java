@@ -188,6 +188,10 @@ final class CarrotDubboDiscoveryClient {
         return selected;
     }
 
+    HostPort getCurrentNode() {
+        return currentNode;
+    }
+
     void closeChannel() {
         synchronized (channelLock) {
             if (managedChannel != null && !managedChannel.isShutdown()) {
@@ -214,7 +218,8 @@ final class CarrotDubboDiscoveryClient {
             }
             HostPort node = currentNode;
             if (node == null) {
-                node = switchToRandomServerNode();
+                switchToRandomServerNode();
+                return;
             }
             managedChannel = newChannel(node, negotiationType);
             blockingStub = DiscoveryServiceGrpc.newBlockingStub(managedChannel);

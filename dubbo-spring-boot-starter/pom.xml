@@ -6,7 +6,7 @@
 
     <groupId>io.github.carrot-jstart</groupId>
     <artifactId>dubbo-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Carrot Dubbo Spring Boot Starter</name>
     <description>Dubbo starter integrating Carrot discovery as a registry implementation.</description>
