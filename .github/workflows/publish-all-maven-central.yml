@@ -40,6 +40,17 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
+      - name: Trust imported GPG key
+        shell: pwsh
+        run: |
+          $keys = gpg --list-secret-keys --keyid-format LONG 2>`$null | Select-String '^sec' | ForEach-Object { $_ -replace '.*/([A-F0-9]+).*', '$$1' }
+          foreach ($keyId in $keys) {
+            Write-Host "Trusting GPG key: $keyId"
+            "trust`n5`ny`nquit" | gpg --batch --command-fd 0 --edit-key "$keyId" trust 2>`$null
+          }
+          Write-Host "Imported GPG secret keys:"
+          gpg --list-secret-keys --keyid-format LONG
+
       - name: Validate release version
         shell: pwsh
         run: |
