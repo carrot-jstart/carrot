@@ -43,8 +43,8 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         run: |
-          printf '%s\n' "$GPG_PRIVATE_KEY" > /tmp/private-key.asc
-          gpg --batch --import --allow-replacement-key /tmp/private-key.asc
+          echo "$GPG_PRIVATE_KEY" > /tmp/private-key.asc
+          gpg --batch --import /tmp/private-key.asc
 
       - name: Validate release version
         shell: pwsh
