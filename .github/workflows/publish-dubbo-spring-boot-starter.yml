@@ -1,4 +1,4 @@
-name: Publish Maven Central
+name: Publish dubbo-spring-boot-starter to Maven Central
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Release version to publish, for example 0.9.1. Leave empty to use the version in pom.xml.'
+        description: 'Release version to publish, for example 1.0.0. Leave empty to use the version in pom.xml.'
         required: false
         type: string
 
@@ -17,7 +17,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     env:
       MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -43,11 +43,9 @@ jobs:
       - name: Validate release version
         shell: pwsh
         run: |
-          $pomFiles = @(
-            "spring-cloud-starter-carrot-config/pom.xml"
-          )
-
+          $pomPath = "dubbo-spring-boot-starter/pom.xml"
           $manualVersion = "${{ inputs.release_version }}"
+
           if ("${{ github.ref_type }}" -eq "tag") {
             $expectedVersion = "${{ github.ref_name }}".TrimStart('v')
             Write-Host "Using tag version: $expectedVersion"
@@ -55,19 +53,18 @@ jobs:
             $expectedVersion = $manualVersion.Trim()
             Write-Host "Using manual input version: $expectedVersion"
           } else {
-            [xml]$firstPom = Get-Content $pomFiles[0]
-            $expectedVersion = $firstPom.project.version
+            [xml]$pom = Get-Content $pomPath
+            $expectedVersion = $pom.project.version
             Write-Host "No tag or manual version provided, using pom.xml version: $expectedVersion"
           }
 
-          foreach ($pomPath in $pomFiles) {
-            [xml]$pom = Get-Content $pomPath
-            $actualVersion = $pom.project.version
-            if ($actualVersion -ne $expectedVersion) {
-              throw "Version mismatch in $pomPath. Expected $expectedVersion but found $actualVersion."
-            }
+          [xml]$pom = Get-Content $pomPath
+          $actualVersion = $pom.project.version
+          if ($actualVersion -ne $expectedVersion) {
+            throw "Version mismatch in $pomPath. Expected $expectedVersion but found $actualVersion."
           }
 
-      - name: Publish spring-cloud-starter-carrot-config
-        run: mvn -B -ntp -Pcentral-release -DskipTests deploy -f spring-cloud-starter-carrot-config/pom.xml
+          Write-Host "Version validated: $expectedVersion"
 
+      - name: Publish to Maven Central
+        run: mvn -B -ntp -Pcentral-release -DskipTests deploy -f dubbo-spring-boot-starter/pom.xml
