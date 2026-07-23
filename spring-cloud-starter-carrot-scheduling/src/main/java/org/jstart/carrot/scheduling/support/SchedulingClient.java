@@ -231,7 +231,7 @@ public class SchedulingClient implements DisposableBean {
                 .setTaskId(taskId)
                 .setCode(code)
                 .setMessage(message)
-                .setData(s)
+                .setData(null != s ? s : "")
                 .addAllRecords(strings)
                 .build();
         try {

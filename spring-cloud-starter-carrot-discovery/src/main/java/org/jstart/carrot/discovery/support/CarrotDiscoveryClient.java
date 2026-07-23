@@ -314,7 +314,8 @@ public class CarrotDiscoveryClient implements DisposableBean {
             HostPort node = currentNode;
             if (node == null) {
                 refreshServerNodes();
-                node = switchToRandomServerNode();
+                switchToRandomServerNode();
+                return;
             }
             managedChannel = ManagedChannelBuilder.forAddress(node.host(), node.port())
                     .usePlaintext()

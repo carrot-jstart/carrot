@@ -13,7 +13,7 @@
 
     <groupId>io.github.carrot-jstart</groupId>
     <artifactId>spring-cloud-starter-carrot-scheduling</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Carrot Scheduling Spring Cloud Starter</name>
     <description>Spring Boot starter for Carrot distributed scheduling.</description>
